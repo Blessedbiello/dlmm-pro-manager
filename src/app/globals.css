@@ -1,26 +1,67 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: system-ui, -apple-system, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Scrollbar styling for dark mode */
+.dark ::-webkit-scrollbar {
+  width: 10px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: rgb(30 41 59);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgb(71 85 105);
+  border-radius: 5px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgb(100 116 139);
+}
+
+/* Wallet adapter modal dark mode styling */
+.dark .wallet-adapter-modal-wrapper {
+  background: rgba(15, 23, 42, 0.95) !important;
+}
+
+.dark .wallet-adapter-modal {
+  background: rgb(30 41 59) !important;
+  color: rgb(248 250 252) !important;
+  border: 1px solid rgb(51 65 85) !important;
+}
+
+.dark .wallet-adapter-modal-title {
+  color: rgb(248 250 252) !important;
+}
+
+.dark .wallet-adapter-modal-button-close {
+  color: rgb(148 163 184) !important;
+}
+
+.dark .wallet-adapter-modal-button-close:hover {
+  color: rgb(248 250 252) !important;
+  background: rgb(51 65 85) !important;
+}
+
+.dark .wallet-adapter-button {
+  background: rgb(51 65 85) !important;
+  color: rgb(248 250 252) !important;
+}
+
+.dark .wallet-adapter-button:hover {
+  background: rgb(71 85 105) !important;
 }
