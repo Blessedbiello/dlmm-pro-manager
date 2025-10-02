@@ -4,10 +4,16 @@
 
 A comprehensive application for managing Dynamic Liquidity Market Maker (DLMM) positions on Saros Finance. Built with enterprise-grade architecture to provide institutional-quality liquidity management tools for DeFi users.
 
-![DLMM Pro Manager](https://img.shields.io/badge/Saros-DLMM_Pro_Manager-blue?style=for-the-badge&logo=solana)
-![Next.js](https://img.shields.io/badge/Next.js-15.5.4-black?style=for-the-badge&logo=next.js)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)
-![Solana](https://img.shields.io/badge/Solana-Web3-purple?style=for-the-badge&logo=solana)
+[![DLMM Pro Manager](https://img.shields.io/badge/Saros-DLMM_Pro_Manager-blue?style=for-the-badge&logo=solana)](https://dlmm-pro-manager-1yvc.vercel.app/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5.4-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![Solana](https://img.shields.io/badge/Solana-Web3-purple?style=for-the-badge&logo=solana)](https://solana.com/)
+
+## 🚀 Live Demo
+
+**[https://dlmm-pro-manager-1yvc.vercel.app/](https://dlmm-pro-manager-1yvc.vercel.app/)**
+
+Experience the full-featured DLMM Pro Manager live on Solana Mainnet-Beta!
 
 ## Overview
 
