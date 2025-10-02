@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { PublicKey, Transaction } from '@solana/web3.js';
 import { LiquidityBookServices, MODE } from '@saros-finance/dlmm-sdk';
-import type { PositionInfo, Pair } from '@saros-finance/dlmm-sdk';
+import type { PositionInfo } from '@saros-finance/dlmm-sdk';
 
 export interface DLMMPool {
   address: string;
@@ -49,7 +49,7 @@ const KNOWN_TOKENS: Record<string, { symbol: string; decimals: number }> = {
 
 export const useDLMM = () => {
   const { connection } = useConnection();
-  const { publicKey, wallet, signTransaction, sendTransaction } = useWallet();
+  const { publicKey, signTransaction, sendTransaction } = useWallet();
 
   const [pools, setPools] = useState<DLMMPool[]>([]);
   const [positions, setPositions] = useState<DLMMPosition[]>([]);
@@ -131,12 +131,13 @@ export const useDLMM = () => {
           poolAddresses = await dlmmService.fetchPoolAddresses();
           console.log(`[DLMM] Found ${poolAddresses?.length || 0} pool addresses:`, poolAddresses);
           break;
-        } catch (fetchErr: any) {
-          console.error(`[DLMM] Error fetching pool addresses:`, fetchErr);
-          console.error(`[DLMM] Error name:`, fetchErr?.name);
-          console.error(`[DLMM] Error message:`, fetchErr?.message);
+        } catch (fetchErr) {
+          const error = fetchErr as Error & {response?: {status?: number}};
+          console.error(`[DLMM] Error fetching pool addresses:`, error);
+          console.error(`[DLMM] Error name:`, error?.name);
+          console.error(`[DLMM] Error message:`, error?.message);
 
-          if (fetchErr?.message?.includes('429') || fetchErr?.response?.status === 429) {
+          if (error?.message?.includes('429') || error?.response?.status === 429) {
             retries++;
             if (retries < maxRetries) {
               const delay = Math.pow(2, retries) * 1000; // Exponential backoff
@@ -320,8 +321,8 @@ export const useDLMM = () => {
     poolAddress: string,
     lowerPrice: number,
     upperPrice: number,
-    tokenXAmount: number,
-    tokenYAmount: number
+    _tokenXAmount: number,
+    _tokenYAmount: number
   ) => {
     if (!publicKey || !signTransaction || !sendTransaction) {
       throw new Error('Wallet not connected');
@@ -389,10 +390,10 @@ export const useDLMM = () => {
     } finally {
       setLoading(false);
     }
-  }, [publicKey, signTransaction, sendTransaction, dlmmService, pools, connection, fetchPositions]);
+  }, [publicKey, signTransaction, sendTransaction, dlmmService, pools, connection, connection.rpcEndpoint, fetchPositions]);
 
   // Remove liquidity from position
-  const removeLiquidity = useCallback(async (positionId: string, amount: number) => {
+  const removeLiquidity = useCallback(async (positionId: string, _amount: number) => {
     if (!publicKey || !signTransaction || !sendTransaction) {
       throw new Error('Wallet not connected');
     }
@@ -446,6 +447,7 @@ export const useDLMM = () => {
       return { success: true, transactionId: signatures[0] };
     } catch (err) {
       const error = err instanceof Error ? err.message : 'Failed to remove liquidity';
+      console.error('Remove liquidity error:', error);
       setError(error);
       console.error('Error removing liquidity:', err);
       throw new Error(error);

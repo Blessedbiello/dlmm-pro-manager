@@ -4,12 +4,10 @@ import React, { useState } from 'react';
 import {
   TrendingUp,
   TrendingDown,
-  DollarSign,
   Zap,
   Settings,
   Trash2,
   ExternalLink,
-  AlertCircle,
   RefreshCw
 } from 'lucide-react';
 import { formatCurrency, formatPercentage, calculatePositionValue, truncateAddress } from '@/lib/utils';
@@ -19,8 +17,8 @@ import { useAutoRebalance } from '@/contexts/AutoRebalanceContext';
 interface PositionsListProps {
   positions: DLMMPosition[];
   pools: DLMMPool[];
-  onRemoveLiquidity: (positionId: string, amount: number) => Promise<any>;
-  onCollectFees: (positionId: string) => Promise<any>;
+  onRemoveLiquidity: (positionId: string, amount: number) => Promise<{success: boolean; transactionId: string}>;
+  onCollectFees: (positionId: string) => Promise<{success: boolean; transactionId: string; feesCollected: number}>;
 }
 
 export function PositionsList({
@@ -74,7 +72,7 @@ export function PositionsList({
         </div>
         <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No Active Positions</h3>
         <p className="text-gray-600 dark:text-gray-400 mb-6">
-          You don't have any DLMM positions yet. Create your first position to start earning fees.
+          You don&apos;t have any DLMM positions yet. Create your first position to start earning fees.
         </p>
       </div>
     );

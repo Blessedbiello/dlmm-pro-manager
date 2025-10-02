@@ -45,7 +45,7 @@ export function truncateAddress(address: string, chars: number = 4): string {
 }
 
 // Calculate APY
-export function calculateAPY(feesEarned: number, liquidity: number, timeFrame: number = 24): number {
+export function calculateAPY(feesEarned: number, liquidity: number, _timeFrame: number = 24): number {
   if (liquidity === 0) return 0;
   const dailyReturn = feesEarned / liquidity;
   const annualReturn = dailyReturn * 365;

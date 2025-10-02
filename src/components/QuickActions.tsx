@@ -8,7 +8,7 @@ import { useAutoRebalance } from '@/contexts/AutoRebalanceContext';
 interface QuickActionsProps {
   pools: DLMMPool[];
   positions: DLMMPosition[];
-  onCreatePosition: (poolAddress: string, lowerPrice: number, upperPrice: number, tokenXAmount: number, tokenYAmount: number) => Promise<any>;
+  onCreatePosition: (poolAddress: string, lowerPrice: number, upperPrice: number, tokenXAmount: number, tokenYAmount: number) => Promise<{success: boolean; transactionId: string}>;
 }
 
 export function QuickActions({ pools, positions, onCreatePosition }: QuickActionsProps) {

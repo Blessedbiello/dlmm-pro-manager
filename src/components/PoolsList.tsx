@@ -11,7 +11,6 @@ interface PoolsListProps {
 
 export function PoolsList({ pools }: PoolsListProps) {
   const isMockData = pools.length === 1 && pools[0].address === "Sample Pool 1";
-  const networkEnv = (process.env.NEXT_PUBLIC_SOLANA_NETWORK || 'mainnet-beta').toUpperCase();
 
   if (pools.length === 0) {
     return (

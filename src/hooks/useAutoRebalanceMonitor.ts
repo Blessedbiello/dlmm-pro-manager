@@ -5,7 +5,7 @@ import { DLMMPosition, DLMMPool } from './useDLMM';
 interface MonitorProps {
   positions: DLMMPosition[];
   pools: DLMMPool[];
-  rebalancePosition: (positionId: string, newRangeWidth: number) => Promise<any>;
+  rebalancePosition: (positionId: string, newRangeWidth: number) => Promise<{success: boolean; transactionId: string; oldRange: {lower: number; upper: number}; newRange: {lower: number; upper: number}}>;
 }
 
 export function useAutoRebalanceMonitor({ positions, pools, rebalancePosition }: MonitorProps) {
