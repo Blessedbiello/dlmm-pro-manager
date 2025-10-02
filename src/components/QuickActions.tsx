@@ -81,13 +81,13 @@ export function QuickActions({ pools, onCreatePosition }: QuickActionsProps) {
 
       {/* Create Position Modal */}
       {showCreateForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6">
+        <div className="fixed inset-0 bg-black/70 dark:bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-xl max-w-md w-full p-6 border border-gray-200 dark:border-slate-700">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900">Create New Position</h3>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Create New Position</h3>
               <button
                 onClick={() => setShowCreateForm(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -98,13 +98,13 @@ export function QuickActions({ pools, onCreatePosition }: QuickActionsProps) {
             <form onSubmit={handleCreatePosition} className="space-y-4">
               {/* Pool Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Select Pool
                 </label>
                 <select
                   value={selectedPool}
                   onChange={(e) => setSelectedPool(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   required
                 >
                   <option value="">Choose a pool...</option>
@@ -121,7 +121,7 @@ export function QuickActions({ pools, onCreatePosition }: QuickActionsProps) {
                   {/* Price Range */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Lower Price
                       </label>
                       <input
@@ -130,12 +130,12 @@ export function QuickActions({ pools, onCreatePosition }: QuickActionsProps) {
                         value={lowerPrice}
                         onChange={(e) => setLowerPrice(e.target.value)}
                         placeholder={`< ${selectedPoolData.currentPrice.toFixed(4)}`}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Upper Price
                       </label>
                       <input
@@ -144,7 +144,7 @@ export function QuickActions({ pools, onCreatePosition }: QuickActionsProps) {
                         value={upperPrice}
                         onChange={(e) => setUpperPrice(e.target.value)}
                         placeholder={`> ${selectedPoolData.currentPrice.toFixed(4)}`}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                         required
                       />
                     </div>
@@ -153,7 +153,7 @@ export function QuickActions({ pools, onCreatePosition }: QuickActionsProps) {
                   {/* Token Amounts */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {selectedPoolData.tokenX.symbol} Amount
                       </label>
                       <input
@@ -162,12 +162,12 @@ export function QuickActions({ pools, onCreatePosition }: QuickActionsProps) {
                         value={tokenXAmount}
                         onChange={(e) => setTokenXAmount(e.target.value)}
                         placeholder="0.0"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {selectedPoolData.tokenY.symbol} Amount
                       </label>
                       <input
@@ -176,18 +176,18 @@ export function QuickActions({ pools, onCreatePosition }: QuickActionsProps) {
                         value={tokenYAmount}
                         onChange={(e) => setTokenYAmount(e.target.value)}
                         placeholder="0.0"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                         required
                       />
                     </div>
                   </div>
 
                   {/* Current Price Info */}
-                  <div className="bg-blue-50 rounded-lg p-3">
-                    <p className="text-sm text-blue-800">
+                  <div className="bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800 rounded-lg p-3">
+                    <p className="text-sm text-indigo-900 dark:text-indigo-200">
                       Current Price: <span className="font-semibold">{selectedPoolData.currentPrice.toFixed(4)}</span>
                     </p>
-                    <p className="text-xs text-blue-600 mt-1">
+                    <p className="text-xs text-indigo-700 dark:text-indigo-300 mt-1">
                       Make sure your price range includes the current price for immediate fee earning
                     </p>
                   </div>
@@ -199,14 +199,14 @@ export function QuickActions({ pools, onCreatePosition }: QuickActionsProps) {
                 <button
                   type="button"
                   onClick={() => setShowCreateForm(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading || !selectedPool}
-                  className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/30"
                 >
                   {loading ? 'Creating...' : 'Create Position'}
                 </button>
