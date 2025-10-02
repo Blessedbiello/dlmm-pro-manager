@@ -3,6 +3,7 @@
 import React from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useDLMM } from '@/hooks/useDLMM';
+import { useAutoRebalanceMonitor } from '@/hooks/useAutoRebalanceMonitor';
 import { PortfolioOverview } from './PortfolioOverview';
 import { PositionsList } from './PositionsList';
 import { PoolsList } from './PoolsList';
@@ -19,8 +20,16 @@ export function Dashboard() {
     error,
     createPosition,
     removeLiquidity,
-    collectFees
+    collectFees,
+    rebalancePosition
   } = useDLMM();
+
+  // Enable auto-rebalance monitoring
+  useAutoRebalanceMonitor({
+    positions,
+    pools,
+    rebalancePosition
+  });
 
   if (!connected) {
     return (
@@ -112,6 +121,7 @@ export function Dashboard() {
         {/* Quick Actions */}
         <QuickActions
           pools={pools}
+          positions={positions}
           onCreatePosition={createPosition}
         />
 

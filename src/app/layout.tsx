@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { WalletContextProvider } from "@/contexts/WalletProvider";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { AutoRebalanceProvider } from "@/contexts/AutoRebalanceContext";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -24,7 +25,9 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans antialiased`}>
         <ThemeProvider>
           <WalletContextProvider>
-            {children}
+            <AutoRebalanceProvider>
+              {children}
+            </AutoRebalanceProvider>
           </WalletContextProvider>
         </ThemeProvider>
       </body>

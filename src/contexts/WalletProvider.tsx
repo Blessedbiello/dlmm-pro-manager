@@ -19,11 +19,37 @@ interface WalletContextProviderProps {
 }
 
 export const WalletContextProvider: FC<WalletContextProviderProps> = ({ children }) => {
-  // The network can be set to 'devnet', 'testnet', or 'mainnet-beta'
-  const network = WalletAdapterNetwork.Devnet;
+  // Get network from environment variable, default to mainnet
+  const networkEnv = process.env.NEXT_PUBLIC_SOLANA_NETWORK || 'mainnet-beta';
 
-  // You can also provide a custom RPC endpoint
-  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+  const network = useMemo(() => {
+    switch (networkEnv) {
+      case 'devnet':
+        return WalletAdapterNetwork.Devnet;
+      case 'testnet':
+        return WalletAdapterNetwork.Testnet;
+      case 'mainnet-beta':
+      case 'mainnet':
+        return WalletAdapterNetwork.Mainnet;
+      default:
+        console.warn(`Unknown network: ${networkEnv}, defaulting to mainnet`);
+        return WalletAdapterNetwork.Mainnet;
+    }
+  }, [networkEnv]);
+
+  // Use custom RPC endpoint if provided, otherwise use default
+  const endpoint = useMemo(() => {
+    const customEndpoint = process.env.NEXT_PUBLIC_RPC_ENDPOINT;
+
+    if (customEndpoint && customEndpoint.trim() !== '') {
+      console.log(`[Wallet] Using custom RPC endpoint for ${networkEnv}:`, customEndpoint);
+      return customEndpoint;
+    }
+
+    console.log(`[Wallet] Using default public RPC for ${networkEnv}`);
+    console.warn('[Wallet] ⚠️ Public RPC will block getProgramAccounts - set NEXT_PUBLIC_RPC_ENDPOINT for real data');
+    return clusterApiUrl(network);
+  }, [network, networkEnv]);
 
   const wallets = useMemo(
     () => [

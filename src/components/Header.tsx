@@ -43,6 +43,12 @@ export function Header() {
           </nav>
 
           <div className="flex items-center space-x-3">
+            {/* Network Indicator */}
+            <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-400 rounded-full text-xs font-medium border border-blue-200 dark:border-blue-800">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <span>{(process.env.NEXT_PUBLIC_SOLANA_NETWORK || 'mainnet-beta').toUpperCase()}</span>
+            </div>
+
             {connected && (
               <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 rounded-full text-sm font-medium border border-emerald-200 dark:border-emerald-800">
                 <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
