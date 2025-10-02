@@ -1,101 +1,97 @@
-# DLMM Pro Manager 🚀
+# DLMM Pro Manager
 
-**The Ultimate DLMM Position Management Platform for Saros Finance**
+**Professional DLMM Position Management Platform**
 
-A comprehensive, production-ready application that showcases the full potential of Saros Finance's DLMM (Dynamic Liquidity Market Maker) SDK. Built for the Saros DLMM SDK bounty competition.
+A comprehensive application for managing Dynamic Liquidity Market Maker (DLMM) positions on Saros Finance. Built with enterprise-grade architecture to provide institutional-quality liquidity management tools for DeFi users.
 
 ![DLMM Pro Manager](https://img.shields.io/badge/Saros-DLMM_Pro_Manager-blue?style=for-the-badge&logo=solana)
 ![Next.js](https://img.shields.io/badge/Next.js-15.5.4-black?style=for-the-badge&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)
 ![Solana](https://img.shields.io/badge/Solana-Web3-purple?style=for-the-badge&logo=solana)
 
-## 🌟 Why This Will Win the Bounty
+## Overview
 
-### ✅ **Multi-Feature Application**
-- **5 Distinct Functionalities**: Position management, automated rebalancing, advanced order types, analytics, and backtesting
-- **Real-world Applicability**: Built for serious DeFi users and institutional traders
-- **Production-Ready**: Clean code with proper error handling and security best practices
+DLMM Pro Manager is a production-ready platform designed to simplify and optimize liquidity provision on Saros Finance's Dynamic Liquidity Market Maker protocol. The application provides institutional-grade tools for position management, automated rebalancing, and advanced analytics, making concentrated liquidity accessible to both retail and institutional users.
 
-### ✅ **Creative SDK Usage**
-- **Primary Integration**: `@saros-finance/dlmm-sdk` for all core DLMM operations
-- **Secondary Integration**: `@saros-finance/sdk` for additional AMM and staking features
-- **Innovative Features**: Demonstrates DLMM's full potential with automated strategies
+### Key Benefits
 
-### ✅ **Hackathon Foundation**
-- **Scalable Architecture**: Easily extensible for hackathon projects
-- **Comprehensive Documentation**: Clear implementation examples for other developers
-- **Open Source**: MIT licensed with detailed contribution guidelines
+- **Streamlined Position Management**: Monitor and manage all your DLMM positions from a single dashboard
+- **Automated Strategy Execution**: Set-and-forget rebalancing strategies that optimize your yield
+- **Risk Mitigation**: Advanced order types including stop-loss and take-profit protection
+- **Data-Driven Decisions**: Comprehensive analytics and backtesting tools for strategy optimization
+- **Real-Time Monitoring**: Live position tracking with customizable alerts and notifications
 
-## 🚀 Live Demo
+## Features
 
-🔗 **Application URL**: http://localhost:3000 (Development)
-🎥 **Demo Video**: [Coming Soon - Recording walkthrough]
-
-## 📋 Features Overview
-
-### 🎯 **1. Real-time Position Dashboard**
+### Real-time Position Dashboard
 - Live DLMM position tracking with P&L calculations
 - Interactive price range visualizations
 - Fee accumulation and APY metrics
 - Position status monitoring (in-range/out-of-range)
 
-### 🤖 **2. Automated Rebalancing System**
+### Automated Rebalancing System
 - Custom rebalancing strategies
 - Price threshold automation
 - Risk management controls
 - Historical rebalancing performance
 
-### 📈 **3. Advanced Order Types**
+### Advanced Order Types
 - Limit orders using DLMM bins
 - Stop-loss protection
 - Take-profit automation
 - Dollar-cost averaging (DCA) strategies
 
-### 📊 **4. Portfolio Analytics & Backtesting**
+### Portfolio Analytics & Backtesting
 - Comprehensive performance tracking
 - Strategy simulation engine
 - Risk assessment tools
 - Historical data analysis
 
-### 🔔 **5. Smart Alerts & Notifications**
+### Smart Alerts & Notifications
 - Real-time position monitoring
 - Customizable alert thresholds
 - Multiple notification methods (in-app, email, Telegram, Discord)
 - Proactive rebalancing suggestions
 
-## 🛠️ Technical Stack
+## Architecture & Design
 
-### **Frontend**
-- **Next.js 15.5.4** with App Router
-- **TypeScript** for type safety
-- **TailwindCSS** + **Lucide Icons** for beautiful UI
-- **Recharts** for data visualization
-- **Responsive Design** for mobile/desktop
+### Frontend Architecture
+- **Next.js 15.5.4** with App Router for server-side rendering and optimal performance
+- **TypeScript** for type safety and enhanced developer experience
+- **TailwindCSS v4** with custom dark mode theme system
+- **Component-based architecture** with reusable UI components
+- **Responsive design** optimized for mobile and desktop experiences
 
-### **Blockchain Integration**
-- **@saros-finance/dlmm-sdk** (Primary - DLMM operations)
-- **@saros-finance/sdk** (Secondary - AMM, Stake, Farm)
-- **@solana/web3.js** for Solana blockchain interaction
-- **@solana/wallet-adapter** for wallet integration
+### Blockchain Integration Layer
+- **@saros-finance/dlmm-sdk** - Core DLMM operations (position management, liquidity provision)
+- **@saros-finance/sdk** - Additional DeFi features (AMM, staking, farming)
+- **@solana/web3.js** - Direct Solana blockchain interaction
+- **@solana/wallet-adapter** - Multi-wallet support (Phantom, Solflare, Torus, WalletConnect)
 
-### **Architecture**
-- **Component-based** React architecture
-- **Custom hooks** for DLMM SDK integration
-- **Context providers** for wallet management
-- **Utility functions** for calculations and formatting
+### State Management & Data Flow
+- **React Context API** for global state (wallet, theme)
+- **Custom hooks** for DLMM SDK integration with built-in error handling
+- **Real-time data synchronization** with 30-second polling intervals
+- **Rate limiting & exponential backoff** for reliable API interactions
 
-## 🚀 Quick Start
+### Design Principles
+- **User-Centric UX**: Intuitive interface designed for both novice and advanced users
+- **Performance First**: Optimized rendering with React memoization and lazy loading
+- **Accessibility**: WCAG compliant with keyboard navigation and screen reader support
+- **Security**: Non-custodial architecture with client-side transaction signing
+
+## Getting Started
 
 ### Prerequisites
 - Node.js 18+ and npm/yarn
-- Solana wallet (Phantom, Solflare, etc.)
-- Access to Solana Devnet/Mainnet
+- Solana wallet browser extension (Phantom, Solflare, etc.)
+- SOL tokens for transactions (Devnet SOL for testing)
 
 ### Installation
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/dlmm-pro-manager.git
+git clone https://github.com/Blessedbiello/dlmm-pro-manager.git
 cd dlmm-pro-manager
 
 # Install dependencies
@@ -107,16 +103,44 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## 📚 SDK Integration Examples
+### Quick Setup Guide
 
-### DLMM Position Creation
+1. **Connect Wallet**: Click "Connect Wallet" and select your preferred Solana wallet
+2. **Switch to Devnet**: Ensure your wallet is connected to Solana Devnet for testing
+3. **View Positions**: Your existing DLMM positions will load automatically
+4. **Create Position**: Use the "New Position" button to create a new liquidity position
+5. **Monitor & Manage**: Track performance and manage positions from the dashboard
+
+## Use Cases
+
+### For Retail Liquidity Providers
+- **Simplified Position Management**: Manage concentrated liquidity without complex math
+- **Automated Yield Optimization**: Set rebalancing strategies to maximize fee earnings
+- **Risk Protection**: Use stop-loss orders to protect against impermanent loss
+- **Performance Tracking**: Monitor ROI and compare against different strategies
+
+### For Professional Traders
+- **Advanced Order Execution**: Implement limit orders and conditional strategies
+- **Backtesting Engine**: Test strategies against historical data before deployment
+- **Multi-Position Management**: Handle multiple DLMM positions across different pools
+- **Custom Alerts**: Real-time notifications for price movements and position status
+
+### For DeFi Protocols
+- **Treasury Management**: Optimize protocol-owned liquidity across DLMM pools
+- **Automated Strategies**: Deploy programmatic liquidity management rules
+- **Analytics Dashboard**: Monitor liquidity performance and fee generation
+- **Risk Management**: Set automated controls for position rebalancing
+
+## SDK Integration Examples
+
+### Creating a DLMM Position
 
 ```typescript
 import { useDLMM } from '@/hooks/useDLMM';
 
 const { createPosition } = useDLMM();
 
-// Create a new DLMM position
+// Create a new DLMM position with concentrated liquidity
 const newPosition = await createPosition(
   poolAddress,
   lowerPrice,  // Lower price bound
@@ -124,18 +148,6 @@ const newPosition = await createPosition(
   tokenXAmount, // Amount of token X
   tokenYAmount  // Amount of token Y
 );
-```
-
-### Automated Rebalancing
-
-```typescript
-// Set up automated rebalancing strategy
-const rebalanceStrategy = {
-  priceThreshold: 0.05,  // 5% price movement
-  frequency: 'daily',
-  minProfitThreshold: 10, // $10 minimum profit
-  maxSlippage: 0.01      // 1% max slippage
-};
 ```
 
 ### Real-time Position Monitoring
@@ -150,74 +162,87 @@ useEffect(() => {
 }, [fetchPositions]);
 ```
 
-## 🎯 Demo Application Highlights
+### Fetching Pool Data
 
-### **Portfolio Overview**
-- **Total Portfolio Value**: Real-time USD valuation
-- **P&L Tracking**: Profit/loss with percentage changes
-- **Fee Earnings**: Cumulative fees from all positions
-- **Performance Metrics**: APY, win rate, best/worst positions
+```typescript
+import { LiquidityBookServices, MODE } from '@saros-finance/dlmm-sdk';
 
-### **Position Management**
-- **Visual Price Ranges**: Interactive charts showing position bounds
-- **Status Indicators**: In-range/out-of-range visual cues
-- **Quick Actions**: One-click fee collection and liquidity removal
-- **Position Settings**: Granular control over each position
+const dlmmService = new LiquidityBookServices({
+  mode: MODE.DEVNET,
+  options: { rpcUrl: connection.rpcEndpoint }
+});
 
-### **Advanced Analytics**
-- **30-Day Performance Chart**: Historical portfolio value tracking
-- **Fee Distribution**: Analysis of fee earnings across positions
-- **Risk Assessment**: Portfolio risk scoring and recommendations
-- **Backtesting Tools**: Strategy simulation with historical data
+// Fetch all available pools
+const poolAddresses = await dlmmService.fetchPoolAddresses();
 
-## 🏆 Bounty Submission Checklist
+// Get detailed pool information
+const pairAccount = await dlmmService.getPairAccount(poolAddress);
+```
 
-- ✅ **Multi-feature demo application** (5 major features)
-- ✅ **Meaningful DLMM SDK integration** (Primary SDK usage)
-- ✅ **Additional Saros SDK usage** (AMM, Stake features)
-- ✅ **Production-ready code** with error handling
-- ✅ **Clean, intuitive UI** with smooth UX
-- ✅ **Real-world applicability** for DeFi users
-- ✅ **Comprehensive documentation** with implementation examples
-- ✅ **Open-source codebase** on GitHub
-- ✅ **Creative SDK feature demonstration**
-- ✅ **Hackathon-ready foundation** for scalability
+## Key Features in Detail
 
-## 🚀 Deployment
+### Portfolio Overview Dashboard
+- **Real-time Portfolio Valuation**: Live USD value tracking across all positions
+- **Comprehensive P&L Tracking**: Profit/loss calculations with percentage changes
+- **Fee Earnings Analytics**: Cumulative fee tracking and breakdown by position
+- **Performance Metrics**: APY calculations, win rates, and position comparisons
 
-### Vercel Deployment
+### Position Management Interface
+- **Visual Price Ranges**: Interactive charts displaying position bounds and current price
+- **Status Indicators**: Clear visual cues for in-range and out-of-range positions
+- **One-Click Actions**: Quick fee collection and liquidity withdrawal
+- **Granular Controls**: Fine-tuned position settings and adjustments
+
+### Analytics & Insights
+- **Historical Performance**: 30-day portfolio value tracking with trend analysis
+- **Fee Distribution Analysis**: Breakdown of fee earnings across different positions
+- **Risk Assessment**: Portfolio risk scoring with actionable recommendations
+- **Strategy Backtesting**: Test strategies against historical data before deployment
+
+## Deployment
+
+### Production Build
 
 ```bash
 # Build the application
-npm run build
-
-# Deploy to Vercel
-npx vercel --prod
-```
-
-### Manual Deployment
-
-```bash
-# Build for production
 npm run build
 
 # Start production server
 npm start
 ```
 
-## 📄 License
+### Vercel Deployment
+
+```bash
+# Deploy to Vercel
+npx vercel --prod
+```
+
+The application is optimized for deployment on Vercel with automatic optimization for Next.js applications.
+
+## Technology Stack Summary
+
+- **Frontend**: Next.js 15.5.4, React 19, TypeScript
+- **Styling**: TailwindCSS v4, Lucide Icons
+- **Blockchain**: Saros Finance DLMM SDK, Solana Web3.js
+- **Wallet**: Solana Wallet Adapter (multi-wallet support)
+- **Data Visualization**: Recharts
+- **State Management**: React Context API
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit pull requests or open issues for bugs and feature requests.
+
+## License
 
 This project is licensed under the MIT License.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
-- **Saros Finance** for the innovative DLMM technology
-- **Solana Foundation** for the robust blockchain infrastructure
-- **TraderJoe** for the original DLMM concept and collaboration
+- **Saros Finance** for the innovative DLMM protocol and SDK
+- **Solana Foundation** for the blockchain infrastructure
+- **TraderJoe** for pioneering the DLMM concept
 
 ---
 
-**Built with ❤️ for the Saros Finance ecosystem and the broader DeFi community**
-
-*This application demonstrates the future of automated liquidity management and serves as a comprehensive example for developers building on Saros Finance.*
-# dlmm-pro-manager
+**Professional liquidity management for the modern DeFi ecosystem**
