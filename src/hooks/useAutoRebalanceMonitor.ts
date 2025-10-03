@@ -1,6 +1,7 @@
 import { useEffect, useCallback } from 'react';
 import { useAutoRebalance } from '@/contexts/AutoRebalanceContext';
 import { DLMMPosition, DLMMPool } from './useDLMM';
+import { notificationService } from '@/lib/notifications';
 
 interface MonitorProps {
   positions: DLMMPosition[];
@@ -43,6 +44,11 @@ export function useAutoRebalanceMonitor({ positions, pools, rebalancePosition }:
       // Check if position is out of range
       const isOutOfRange = currentPrice < position.lowerPrice || currentPrice > position.upperPrice;
 
+      if (isOutOfRange) {
+        // Send notification that position is out of range
+        await notificationService.notifyPositionOutOfRange(position.id, currentPrice);
+      }
+
       if (!isOutOfRange) {
         continue;
       }
@@ -74,6 +80,9 @@ export function useAutoRebalanceMonitor({ positions, pools, rebalancePosition }:
           txHash: result.transactionId,
           success: true
         });
+
+        // Send notification about successful rebalance
+        await notificationService.notifyRebalanceExecuted(position.id, result.oldRange, result.newRange);
 
         console.log(`Successfully rebalanced position ${position.id}`);
       } catch (error) {

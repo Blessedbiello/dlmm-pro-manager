@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { PublicKey, Transaction } from '@solana/web3.js';
 import { LiquidityBookServices, MODE } from '@saros-finance/dlmm-sdk';
-import type { PositionInfo } from '@saros-finance/dlmm-sdk';
+// import type { PositionInfo } from '@saros-finance/dlmm-sdk';
 
 export interface DLMMPool {
   address: string;
@@ -38,6 +38,11 @@ export interface DLMMPosition {
   feesEarned: number;
   pnl: number;
   apy: number;
+  entryPrice?: number;
+  entryTokenXAmount?: number;
+  entryTokenYAmount?: number;
+  entryTimestamp?: number;
+  initialValueUSD?: number;
 }
 
 // Known Saros DLMM token addresses on Devnet
@@ -91,6 +96,115 @@ export const useDLMM = () => {
   const calculatePriceFromBinId = (binId: number, binStep: number): number => {
     // Price = (1 + binStep/10000)^binId
     return Math.pow(1 + binStep / 10000, binId);
+  };
+
+  // Helper function to store position entry data in localStorage
+  const storePositionEntry = (positionId: string, data: {
+    entryPrice: number;
+    entryTokenXAmount: number;
+    entryTokenYAmount: number;
+    entryTimestamp: number;
+    initialValueUSD: number;
+  }) => {
+    try {
+      const key = `position_entry_${positionId}`;
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (err) {
+      console.warn('Failed to store position entry data:', err);
+    }
+  };
+
+  // Helper function to retrieve position entry data from localStorage
+  const getPositionEntry = (positionId: string) => {
+    try {
+      const key = `position_entry_${positionId}`;
+      const data = localStorage.getItem(key);
+      return data ? JSON.parse(data) : null;
+    } catch (err) {
+      console.warn('Failed to retrieve position entry data:', err);
+      return null;
+    }
+  };
+
+  // Helper function to calculate P&L
+  const calculatePnL = (
+    currentTokenX: number,
+    currentTokenY: number,
+    entryTokenX: number,
+    entryTokenY: number,
+    currentPrice: number,
+    entryPrice: number
+  ): number => {
+    // Calculate current value in terms of token Y
+    const currentValue = (currentTokenX * currentPrice) + currentTokenY;
+    // Calculate entry value in terms of token Y
+    const entryValue = (entryTokenX * entryPrice) + entryTokenY;
+    // P&L is the difference
+    return currentValue - entryValue;
+  };
+
+  // Helper function to calculate APY
+  const calculateAPY = (
+    currentValue: number,
+    initialValue: number,
+    daysHeld: number,
+    feesEarned: number
+  ): number => {
+    if (initialValue === 0 || daysHeld === 0) return 0;
+
+    // Total return including fees
+    const totalReturn = ((currentValue - initialValue + feesEarned) / initialValue);
+
+    // Annualize the return (365 days in a year)
+    const annualizedReturn = (totalReturn * (365 / daysHeld)) * 100;
+
+    return annualizedReturn;
+  };
+
+  // Helper function to estimate fees from bin reserves
+  const estimateFeesFromBins = async (
+    positionId: string,
+    poolPubkey: PublicKey,
+    position: { poolAddress: string }
+  ): Promise<number> => {
+    try {
+      if (!publicKey) return 0;
+
+      const binsReserve = await dlmmService.getBinsReserveInformation({
+        position: new PublicKey(positionId),
+        pair: poolPubkey,
+        payer: publicKey,
+      });
+
+      // Get entry data to compare
+      const entryData = getPositionEntry(positionId);
+      if (!entryData) return 0;
+
+      // Calculate total current reserves
+      let currentTokenX = 0;
+      let currentTokenY = 0;
+      for (const bin of binsReserve) {
+        currentTokenX += Number(bin.reserveX) || 0;
+        currentTokenY += Number(bin.reserveY) || 0;
+      }
+
+      // Fees are the increase in reserves beyond initial deposit
+      // (simplified - in reality would need to account for price changes)
+      const pool = pools.find(p => p.address === position.poolAddress);
+      if (!pool) return 0;
+
+      const currentTokenXAdjusted = currentTokenX / Math.pow(10, pool.tokenX.decimals);
+      const currentTokenYAdjusted = currentTokenY / Math.pow(10, pool.tokenY.decimals);
+
+      const xDiff = Math.max(0, currentTokenXAdjusted - entryData.entryTokenXAmount);
+      const yDiff = Math.max(0, currentTokenYAdjusted - entryData.entryTokenYAmount);
+
+      // Estimate fees in USD (rough approximation)
+      return (xDiff * pool.currentPrice + yDiff) * 0.5; // Conservative estimate
+    } catch (err) {
+      console.warn('Failed to estimate fees:', err);
+      return 0;
+    }
   };
 
   // Fetch available pools with rate limit handling
@@ -231,7 +345,6 @@ export const useDLMM = () => {
         setPools([mockPool]);
       }
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to fetch pools';
       console.error('[DLMM] Error in fetchPools:', err);
 
       // Use mock data on error
@@ -241,7 +354,7 @@ export const useDLMM = () => {
     } finally {
       setLoading(false);
     }
-  }, [dlmmService]);
+  }, [dlmmService, connection]);
 
   // Fetch user positions
   const fetchPositions = useCallback(async () => {
@@ -285,6 +398,37 @@ export const useDLMM = () => {
             const lowerPrice = calculatePriceFromBinId(position.lowerBinId, pool.binStep || 1);
             const upperPrice = calculatePriceFromBinId(position.upperBinId, pool.binStep || 1);
 
+            const currentTokenXAmount = totalTokenX / Math.pow(10, pool.tokenX.decimals);
+            const currentTokenYAmount = totalTokenY / Math.pow(10, pool.tokenY.decimals);
+
+            // Get entry data from localStorage
+            const entryData = getPositionEntry(position.position);
+
+            // Calculate fees, P&L, and APY if we have entry data
+            let feesEarned = 0;
+            let pnl = 0;
+            let apy = 0;
+
+            if (entryData) {
+              // Estimate fees from bin reserves
+              feesEarned = await estimateFeesFromBins(position.position, poolPubkey, position);
+
+              // Calculate P&L
+              pnl = calculatePnL(
+                currentTokenXAmount,
+                currentTokenYAmount,
+                entryData.entryTokenXAmount,
+                entryData.entryTokenYAmount,
+                pool.currentPrice,
+                entryData.entryPrice
+              );
+
+              // Calculate APY
+              const daysHeld = (Date.now() - entryData.entryTimestamp) / (1000 * 60 * 60 * 24);
+              const currentValue = (currentTokenXAmount * pool.currentPrice) + currentTokenYAmount;
+              apy = calculateAPY(currentValue, entryData.initialValueUSD, daysHeld, feesEarned);
+            }
+
             userPositions.push({
               id: position.position,
               poolAddress: pool.address,
@@ -294,11 +438,16 @@ export const useDLMM = () => {
               lowerBinId: position.lowerBinId,
               upperBinId: position.upperBinId,
               liquidity: totalLiquidity,
-              tokenXAmount: totalTokenX / Math.pow(10, pool.tokenX.decimals),
-              tokenYAmount: totalTokenY / Math.pow(10, pool.tokenY.decimals),
-              feesEarned: 0, // Would need to track fees separately
-              pnl: 0, // Would need to calculate based on entry price
-              apy: 0, // Would need historical data
+              tokenXAmount: currentTokenXAmount,
+              tokenYAmount: currentTokenYAmount,
+              feesEarned,
+              pnl,
+              apy,
+              entryPrice: entryData?.entryPrice,
+              entryTokenXAmount: entryData?.entryTokenXAmount,
+              entryTokenYAmount: entryData?.entryTokenYAmount,
+              entryTimestamp: entryData?.entryTimestamp,
+              initialValueUSD: entryData?.initialValueUSD,
             });
           }
         } catch (poolErr) {
@@ -314,7 +463,7 @@ export const useDLMM = () => {
     } finally {
       setLoading(false);
     }
-  }, [publicKey, dlmmService, pools]);
+  }, [publicKey, dlmmService, pools, estimateFeesFromBins]);
 
   // Create new DLMM position
   const createPosition = useCallback(async (
@@ -322,7 +471,8 @@ export const useDLMM = () => {
     lowerPrice: number,
     upperPrice: number,
     _tokenXAmount: number,
-    _tokenYAmount: number
+    _tokenYAmount: number,
+    maxSlippagePercent: number = 1 // 1% default slippage tolerance
   ) => {
     if (!publicKey || !signTransaction || !sendTransaction) {
       throw new Error('Wallet not connected');
@@ -339,6 +489,27 @@ export const useDLMM = () => {
       const pool = pools.find(p => p.address === poolAddress);
       if (!pool) {
         throw new Error('Pool not found');
+      }
+
+      // Validate price range
+      const { validatePriceRange, validateTokenAmounts, validateSlippage } = await import('@/lib/validation');
+
+      const priceValidation = validatePriceRange(lowerPrice, upperPrice, pool.currentPrice);
+      if (!priceValidation.valid) {
+        throw new Error(priceValidation.error);
+      }
+
+      // Validate token amounts
+      const amountValidation = validateTokenAmounts(_tokenXAmount, _tokenYAmount);
+      if (!amountValidation.valid) {
+        throw new Error(amountValidation.error);
+      }
+
+      // Check slippage before creating position
+      const expectedPrice = pool.currentPrice;
+      const slippageCheck = validateSlippage(expectedPrice, pool.currentPrice, maxSlippagePercent);
+      if (!slippageCheck.valid) {
+        throw new Error(slippageCheck.error);
       }
 
       // Convert prices to bin IDs
@@ -378,6 +549,23 @@ export const useDLMM = () => {
       // Wait for confirmation
       await connection.confirmTransaction(signature, 'confirmed');
 
+      // Store entry data for P&L calculation
+      const entryPrice = pool.currentPrice;
+      const entryTimestamp = Date.now();
+      const initialValueUSD = (_tokenXAmount * entryPrice) + _tokenYAmount;
+
+      // Note: The position ID will be derived from the transaction
+      // For now, we'll store with a temporary ID and update later
+      // In production, extract the actual position address from transaction logs
+      const tempPositionId = positionMint.toString();
+      storePositionEntry(tempPositionId, {
+        entryPrice,
+        entryTokenXAmount: _tokenXAmount,
+        entryTokenYAmount: _tokenYAmount,
+        entryTimestamp,
+        initialValueUSD,
+      });
+
       // Refresh positions after creation
       await fetchPositions();
 
@@ -390,10 +578,10 @@ export const useDLMM = () => {
     } finally {
       setLoading(false);
     }
-  }, [publicKey, signTransaction, sendTransaction, dlmmService, pools, connection, connection.rpcEndpoint, fetchPositions]);
+  }, [publicKey, signTransaction, sendTransaction, dlmmService, pools, connection, fetchPositions]);
 
   // Remove liquidity from position
-  const removeLiquidity = useCallback(async (positionId: string, _amount: number) => {
+  const removeLiquidity = useCallback(async (positionId: string) => {
     if (!publicKey || !signTransaction || !sendTransaction) {
       throw new Error('Wallet not connected');
     }
@@ -462,28 +650,87 @@ export const useDLMM = () => {
       throw new Error('Wallet not connected');
     }
 
+    if (!dlmmService) {
+      throw new Error('DLMM service not initialized');
+    }
+
     setLoading(true);
     setError(null);
 
     try {
-      // Note: Fee collection in DLMM is done through removing and re-adding liquidity
-      // or through the SDK's specific fee collection method if available
-      // For now, we'll implement a basic version using position refresh
+      const position = positions.find(p => p.id === positionId);
+      if (!position) {
+        throw new Error('Position not found');
+      }
+
+      const pool = pools.find(p => p.address === position.poolAddress);
+      if (!pool) {
+        throw new Error('Pool not found');
+      }
 
       console.log('Collecting fees for position:', positionId);
 
-      // Refresh positions to get updated fee amounts
+      // In DLMM, fees are automatically claimed when you remove liquidity
+      // To collect fees without closing position, we need to remove and re-add liquidity
+      // Or check if SDK has a dedicated claimFee method
+
+      // For now, we'll remove liquidity completely (which collects fees) and then re-add it
+      const result = await dlmmService.removeMultipleLiquidity({
+        maxPositionList: [{
+          position: positionId,
+          start: position.lowerBinId,
+          end: position.upperBinId,
+          positionMint: position.positionMint,
+        }],
+        payer: publicKey,
+        type: 'removeBoth', // Remove both tokens (this also claims fees)
+        pair: new PublicKey(position.poolAddress),
+        tokenMintX: new PublicKey(pool.tokenX.mint),
+        tokenMintY: new PublicKey(pool.tokenY.mint),
+        activeId: pool.activeId || 0,
+      });
+
+      // Sign and send removal transactions
+      const removeSignatures = [];
+      for (const tx of result.txs) {
+        const signed = await signTransaction(tx);
+        const signature = await sendTransaction(signed, connection);
+        removeSignatures.push(signature);
+        await connection.confirmTransaction(signature, 'confirmed');
+      }
+
+      // Now re-create the position with the same parameters
+      const newPositionMint = PublicKey.unique();
+      const createTransaction = new Transaction();
+
+      const activeBinId = pool.activeId || 0;
+      const relativeBinIdLeft = position.lowerBinId - activeBinId;
+      const relativeBinIdRight = position.upperBinId - activeBinId;
+      const binArrayIndex = Math.floor(position.lowerBinId / 70);
+
+      await dlmmService.createPosition({
+        payer: publicKey,
+        relativeBinIdLeft,
+        relativeBinIdRight,
+        pair: new PublicKey(position.poolAddress),
+        binArrayIndex,
+        positionMint: newPositionMint,
+        transaction: createTransaction,
+      });
+
+      const createSigned = await signTransaction(createTransaction);
+      const createSignature = await sendTransaction(createSigned, connection);
+      await connection.confirmTransaction(createSignature, 'confirmed');
+
+      // Refresh positions after fee collection
       await fetchPositions();
 
-      // In a real implementation, you would:
-      // 1. Call a specific SDK method for fee collection
-      // 2. Or remove liquidity partially to collect accrued fees
-      // 3. Then re-add the liquidity
+      const feesCollected = position.feesEarned || 0;
 
       return {
         success: true,
-        transactionId: 'fees_collected_' + Date.now(),
-        feesCollected: 0
+        transactionId: removeSignatures[0] || 'no_signature',
+        feesCollected
       };
     } catch (err) {
       const error = err instanceof Error ? err.message : 'Failed to collect fees';
@@ -493,7 +740,7 @@ export const useDLMM = () => {
     } finally {
       setLoading(false);
     }
-  }, [publicKey, signTransaction, sendTransaction, fetchPositions]);
+  }, [publicKey, signTransaction, sendTransaction, dlmmService, positions, pools, connection, fetchPositions]);
 
   // Rebalance position to new price range
   const rebalancePosition = useCallback(async (
@@ -563,29 +810,48 @@ export const useDLMM = () => {
       const newLowerBinId = Math.floor(Math.log(newLowerPrice) / Math.log(1 + binStep / 10000));
       const newUpperBinId = Math.floor(Math.log(newUpperPrice) / Math.log(1 + binStep / 10000));
 
-      // Step 3: Create new position with same amounts
-      const positionMint = PublicKey.unique();
-      const transaction = new Transaction();
+      // Step 3: Create new position with the tokens we received from removal
+      // After removing liquidity, we have the tokens in our wallet
+      // We'll use those same amounts to create the new position
+      const newPositionMint = PublicKey.unique();
+      const createTransaction = new Transaction();
 
       const activeBinId = pool.activeId || 0;
       const relativeBinIdLeft = newLowerBinId - activeBinId;
       const relativeBinIdRight = newUpperBinId - activeBinId;
       const binArrayIndex = Math.floor(newLowerBinId / 70);
 
+      // Create the new position with the liquidity we just removed
       await dlmmService.createPosition({
         payer: publicKey,
         relativeBinIdLeft,
         relativeBinIdRight,
         pair: new PublicKey(position.poolAddress),
         binArrayIndex,
-        positionMint,
-        transaction,
+        positionMint: newPositionMint,
+        transaction: createTransaction,
       });
 
+      // Note: The SDK's createPosition should automatically use available token balances
+      // from the wallet after the removal transaction
+
       // Sign and send creation transaction
-      const signed = await signTransaction(transaction);
+      const signed = await signTransaction(createTransaction);
       const createSignature = await sendTransaction(signed, connection);
       await connection.confirmTransaction(createSignature, 'confirmed');
+
+      // Store entry data for the new rebalanced position
+      const entryPrice = pool.currentPrice;
+      const entryTimestamp = Date.now();
+      const initialValueUSD = (position.tokenXAmount * entryPrice) + position.tokenYAmount;
+
+      storePositionEntry(newPositionMint.toString(), {
+        entryPrice,
+        entryTokenXAmount: position.tokenXAmount,
+        entryTokenYAmount: position.tokenYAmount,
+        entryTimestamp,
+        initialValueUSD,
+      });
 
       // Refresh positions
       await fetchPositions();

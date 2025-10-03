@@ -10,33 +10,66 @@ interface PerformanceChartProps {
 }
 
 export function PerformanceChart({ positions }: PerformanceChartProps) {
-  // Generate mock performance data based on positions
+  // Generate real performance data from position history
   const generatePerformanceData = () => {
     const data = [];
     const now = new Date();
+
+    // Get historical snapshots from localStorage
+    const getHistoricalSnapshot = (daysAgo: number) => {
+      const key = `portfolio_snapshot_${daysAgo}`;
+      const stored = localStorage.getItem(key);
+      return stored ? JSON.parse(stored) : null;
+    };
 
     for (let i = 29; i >= 0; i--) {
       const date = new Date(now);
       date.setDate(date.getDate() - i);
 
-      // Calculate cumulative value based on positions
-      const totalValue = positions.reduce((sum, position) => {
-        // Simulate daily performance variation
-        const dailyVariation = (Math.random() - 0.5) * 0.02; // ±1% daily variation
-        const baseValue = position.tokenXAmount * 245 + position.tokenYAmount; // Approximate USD value
-        const timeBasedGrowth = (29 - i) * 0.001; // Small daily growth
-        return sum + baseValue * (1 + timeBasedGrowth + dailyVariation);
-      }, 0);
+      // Try to get historical snapshot
+      const snapshot = getHistoricalSnapshot(i);
 
-      const fees = positions.reduce((sum, position) => {
-        const dailyFees = position.feesEarned * ((29 - i) / 29); // Accumulate fees over time
-        return sum + dailyFees;
-      }, 0);
+      let totalValue = 0;
+      let fees = 0;
+      let pnl = 0;
 
-      const pnl = positions.reduce((sum, position) => {
-        const dailyPnL = position.pnl * ((29 - i) / 29);
-        return sum + dailyPnL;
-      }, 0);
+      if (snapshot) {
+        // Use real historical data if available
+        totalValue = snapshot.totalValue;
+        fees = snapshot.fees;
+        pnl = snapshot.pnl;
+      } else {
+        // Calculate current values and extrapolate backwards
+        positions.forEach(position => {
+          if (!position.entryTimestamp) return;
+
+          const entryDate = new Date(position.entryTimestamp);
+          const dataDate = date.getTime();
+
+          // Only include positions that existed at this date
+          if (dataDate >= entryDate.getTime()) {
+            const daysHeld = (dataDate - entryDate.getTime()) / (1000 * 60 * 60 * 24);
+
+            // Estimate historical value based on position entry and current data
+            const currentValue = (position.tokenXAmount * 245) + position.tokenYAmount;
+            const valueAtDate = position.initialValueUSD || currentValue;
+
+            // Linearly interpolate between entry value and current value
+            const progress = position.entryTimestamp
+              ? Math.min(daysHeld / ((now.getTime() - position.entryTimestamp) / (1000 * 60 * 60 * 24)), 1)
+              : 0;
+
+            const interpolatedValue = valueAtDate + (currentValue - valueAtDate) * progress;
+            totalValue += interpolatedValue;
+
+            // Accumulate fees proportionally
+            fees += position.feesEarned * progress;
+
+            // Accumulate P&L proportionally
+            pnl += position.pnl * progress;
+          }
+        });
+      }
 
       data.push({
         date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
@@ -45,6 +78,23 @@ export function PerformanceChart({ positions }: PerformanceChartProps) {
         fees: Math.round(fees * 100) / 100,
         pnl: Math.round(pnl * 100) / 100,
       });
+    }
+
+    // Store today's snapshot for future historical reference
+    const todaySnapshot = {
+      totalValue: data[data.length - 1]?.totalValue || 0,
+      fees: data[data.length - 1]?.fees || 0,
+      pnl: data[data.length - 1]?.pnl || 0,
+      timestamp: now.getTime(),
+    };
+    localStorage.setItem('portfolio_snapshot_0', JSON.stringify(todaySnapshot));
+
+    // Rotate snapshots (move day 0 to day 1, etc.)
+    for (let i = 29; i > 0; i--) {
+      const prevSnapshot = localStorage.getItem(`portfolio_snapshot_${i - 1}`);
+      if (prevSnapshot) {
+        localStorage.setItem(`portfolio_snapshot_${i}`, prevSnapshot);
+      }
     }
 
     return data;
@@ -167,15 +217,42 @@ export function PerformanceChart({ positions }: PerformanceChartProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-200">
         <div className="text-center">
           <p className="text-sm text-gray-600">30-Day Return</p>
-          <p className="text-lg font-semibold text-green-600">+12.5%</p>
+          <p className={`text-lg font-semibold ${
+            performanceData.length > 0 && performanceData[performanceData.length - 1].totalValue > performanceData[0].totalValue
+              ? 'text-green-600'
+              : 'text-red-600'
+          }`}>
+            {performanceData.length > 0 && performanceData[0].totalValue > 0
+              ? `${((performanceData[performanceData.length - 1].totalValue - performanceData[0].totalValue) / performanceData[0].totalValue * 100).toFixed(1)}%`
+              : '0.0%'
+            }
+          </p>
         </div>
         <div className="text-center">
           <p className="text-sm text-gray-600">Best Day</p>
-          <p className="text-lg font-semibold text-blue-600">+3.2%</p>
+          <p className="text-lg font-semibold text-blue-600">
+            {performanceData.length > 1
+              ? `+${Math.max(...performanceData.slice(1).map((day, i) =>
+                  day.totalValue > 0 && performanceData[i].totalValue > 0
+                    ? ((day.totalValue - performanceData[i].totalValue) / performanceData[i].totalValue * 100)
+                    : 0
+                )).toFixed(1)}%`
+              : '0.0%'
+            }
+          </p>
         </div>
         <div className="text-center">
           <p className="text-sm text-gray-600">Worst Day</p>
-          <p className="text-lg font-semibold text-red-600">-1.8%</p>
+          <p className="text-lg font-semibold text-red-600">
+            {performanceData.length > 1
+              ? `${Math.min(...performanceData.slice(1).map((day, i) =>
+                  day.totalValue > 0 && performanceData[i].totalValue > 0
+                    ? ((day.totalValue - performanceData[i].totalValue) / performanceData[i].totalValue * 100)
+                    : 0
+                )).toFixed(1)}%`
+              : '0.0%'
+            }
+          </p>
         </div>
       </div>
     </div>
